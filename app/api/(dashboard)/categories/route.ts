@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { getUserById } from "@/data/user";
 
 import db from "@/lib/db";
+import { generateId } from "@/lib/id-generator";
 
 export const GET = async (req: Request) => {
   try {
@@ -82,6 +83,7 @@ export const POST = async (req: Request) => {
     const { title, description } = await req.json();
     const newCategory = await db.category.create({
       data: {
+        id: generateId("category_", 12),
         userId: user.id,
         title,
         description,
@@ -93,6 +95,21 @@ export const POST = async (req: Request) => {
       { status: 200 }
     );
   } catch (error) {
+    if (
+      error instanceof Error &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return new NextResponse(
+        JSON.stringify({
+          message: "failed to create category, please try again.",
+        }),
+        {
+          status: 400,
+        }
+      );
+    }
+
     return new NextResponse(`Error in creating category: ${error}`, {
       status: 500,
     });

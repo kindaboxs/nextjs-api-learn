@@ -46,7 +46,7 @@ model Account {
 }
 
 model Category {
-  id          String  @id @default(cuid())
+  id          String  @unique
   userId      String
   title       String
   description String?
